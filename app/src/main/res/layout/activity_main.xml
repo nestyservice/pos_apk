@@ -6,17 +6,18 @@
     android:orientation="vertical"
     android:background="@color/nesty_cream">
 
-    <!-- Top Status Bar -->
+    <!-- Top Navigation / Status Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/nesty_burgundy"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:elevation="4dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -27,22 +28,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="nesty POS"
+                android:text="NESTY POS"
                 android:textColor="@color/nesty_gold"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-black" />
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.05" />
 
             <TextView
                 android:id="@+id/tvOperatorName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Operator: Counter 1"
+                android:text="Operator: Counter 1 (POS-1008)"
                 android:textColor="@color/white"
-                android:textSize="11sp" />
+                android:textSize="11sp"
+                android:layout_marginTop="1dp" />
         </LinearLayout>
 
-        <!-- Status Indicator Pill -->
+        <!-- Online Status Indicator -->
         <LinearLayout
             android:id="@+id/pillNetworkStatus"
             android:layout_width="wrap_content"
@@ -50,15 +53,15 @@
             android:background="@drawable/bg_status_online"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:layout_marginEnd="8dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <View
-                android:layout_width="6dp"
-                android:layout_height="6dp"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
                 android:background="@drawable/ic_dot_green"
                 android:layout_marginEnd="6dp" />
 
@@ -75,152 +78,168 @@
         <!-- Settings Button -->
         <ImageButton
             android:id="@+id/btnSettings"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_preferences"
             app:tint="@color/white"
             android:contentDescription="Settings" />
     </LinearLayout>
 
-    <!-- Main Content Area -->
-    <LinearLayout
+    <!-- Scrollable Main Container -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <!-- Code Display Card -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/white"
-            android:layout_marginBottom="12dp">
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:gravity="center_horizontal">
 
-            <LinearLayout
+            <!-- Primary Verification Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp"
-                android:gravity="center">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/keypad_title"
-                    android:textColor="@color/nesty_text_secondary"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
-
-                <!-- Large Code Display -->
-                <TextView
-                    android:id="@+id/tvCodeDisplay"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="-----"
-                    android:textColor="@color/nesty_burgundy"
-                    android:textSize="38sp"
-                    android:textStyle="bold"
-                    android:fontFamily="monospace"
-                    android:gravity="center"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:letterSpacing="0.25" />
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
 
-                <TextView
-                    android:id="@+id/tvStatusMessage"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ENTER 3-CHARACTER BILL CODE"
+                        android:textColor="@color/nesty_burgundy"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Must contain letters and numbers (e.g. A7B, K2M, P5X)"
+                        android:textColor="@color/nesty_text_secondary"
+                        android:textSize="11sp"
+                        android:layout_marginTop="3dp" />
+
+                    <!-- 3-Character Alphanumeric Input Field -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilBillCode"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="220dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp"
+                        app:boxStrokeColor="@color/nesty_burgundy"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:endIconMode="clear_text">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etBillCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLength="3"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:inputType="textCapCharacters|textNoSuggestions"
+                            android:hint="A7B"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            android:textSize="36sp"
+                            android:textStyle="bold"
+                            android:fontFamily="monospace"
+                            android:letterSpacing="0.25"
+                            android:textColor="@color/nesty_burgundy" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Verify Order Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnVerify"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="VERIFY ORDER"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="16dp"
+                        app:backgroundTint="@color/nesty_burgundy"
+                        android:layout_marginTop="8dp" />
+
+                    <!-- Clear / Reset Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClear"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clear Code"
+                        android:textColor="@color/nesty_text_secondary"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp" />
+
+                    <!-- Status / Validation Message -->
+                    <TextView
+                        android:id="@+id/tvStatusMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ready for order verification"
+                        android:textColor="@color/nesty_text_secondary"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="4dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Operational Guide Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp"
+                app:cardBackgroundColor="@color/nesty_cream_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Type 5-digit Bill Code, Token, or Scan QR"
-                    android:textColor="@color/nesty_text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <!-- Keypad Grid (3 columns: 1-9, Clear, 0, Scan) -->
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:columnCount="3"
-            android:rowCount="4"
-            android:alignmentMode="alignMargins">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="COUNTER WORKFLOW"
+                        android:textColor="@color/nesty_burgundy"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
 
-            <!-- Row 1: 1, 2, 3 -->
-            <Button
-                android:id="@+id/btn1"
-                style="@style/KeypadButton"
-                android:text="1" />
-            <Button
-                android:id="@+id/btn2"
-                style="@style/KeypadButton"
-                android:text="2" />
-            <Button
-                android:id="@+id/btn3"
-                style="@style/KeypadButton"
-                android:text="3" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1. Student gives their 3-character Bill Code (e.g. A7B).\n2. Operator types the code and taps Verify Order.\n3. Screen shows Student Name, Items, and Total Amount.\n4. Tap Print Bill to print the receipt on the built-in printer.\n5. Order automatically completes and code is reused."
+                        android:textColor="@color/nesty_text_secondary"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-            <!-- Row 2: 4, 5, 6 -->
-            <Button
-                android:id="@+id/btn4"
-                style="@style/KeypadButton"
-                android:text="4" />
-            <Button
-                android:id="@+id/btn5"
-                style="@style/KeypadButton"
-                android:text="5" />
-            <Button
-                android:id="@+id/btn6"
-                style="@style/KeypadButton"
-                android:text="6" />
-
-            <!-- Row 3: 7, 8, 9 -->
-            <Button
-                android:id="@+id/btn7"
-                style="@style/KeypadButton"
-                android:text="7" />
-            <Button
-                android:id="@+id/btn8"
-                style="@style/KeypadButton"
-                android:text="8" />
-            <Button
-                android:id="@+id/btn9"
-                style="@style/KeypadButton"
-                android:text="9" />
-
-            <!-- Row 4: CLEAR, 0, SCAN QR -->
-            <Button
-                android:id="@+id/btnClear"
-                style="@style/KeypadButtonClear"
-                android:text="C" />
-            <Button
-                android:id="@+id/btn0"
-                style="@style/KeypadButton"
-                android:text="0" />
-            <Button
-                android:id="@+id/btnScan"
-                style="@style/KeypadButtonScan"
-                android:text="SCAN" />
-        </GridLayout>
-
-        <!-- Big Verify & Print Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnVerify"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/btn_verify"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            app:cornerRadius="16dp"
-            app:backgroundTint="@color/nesty_burgundy"
-            android:layout_marginTop="8dp" />
-
-    </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
-

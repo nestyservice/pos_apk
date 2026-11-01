@@ -65,7 +65,7 @@ public class OrderDetailsDialog extends Dialog {
             codesText += "Bill Code: " + order.getBillCode();
         }
         if (order.getPickupToken() != null && !order.getPickupToken().isEmpty()) {
-            if (!codesText.isEmpty()) codesText += " • ";
+            if (!codesText.isEmpty()) codesText += " | ";
             codesText += "Token: " + order.getPickupToken();
         }
         tvDialogBillCode.setText(codesText);
@@ -80,11 +80,11 @@ public class OrderDetailsDialog extends Dialog {
                     .append(it.getQuantity())
                     .append("x ")
                     .append(it.getName())
-                    .append(String.format(Locale.getDefault(), " (₹%.2f)\n", it.getPrice() * it.getQuantity()));
+                    .append(String.format(Locale.getDefault(), " (Rs.%.2f)\n", it.getPrice() * it.getQuantity()));
             }
         }
         tvDialogItems.setText(itemsText.toString().trim());
-        tvDialogTotalAmount.setText(String.format(Locale.getDefault(), "₹%.2f", order.getFinalAmount()));
+        tvDialogTotalAmount.setText(String.format(Locale.getDefault(), "Rs. %.2f", order.getFinalAmount()));
 
         btnDialogCancel.setOnClickListener(v -> dismiss());
 
@@ -100,7 +100,7 @@ public class OrderDetailsDialog extends Dialog {
         String operatorId = sessionManager.getOperatorName();
         String ptxnId = "ptxn_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
 
-        // 1. Acquire Atomic Claim Lock
+        // 1. Acquire Atomic Claim Lock (45 seconds)
         api.claimOrder(new OrderModels.ClaimRequest(order.getId(), operatorId, ptxnId)).enqueue(new Callback<OrderModels.GenericResponse>() {
             @Override
             public void onResponse(Call<OrderModels.GenericResponse> call, Response<OrderModels.GenericResponse> response) {
@@ -109,7 +109,7 @@ public class OrderDetailsDialog extends Dialog {
                     printerDriver.printReceipt(order, sessionManager.getTerminalId(), new IPrinterDriver.PrintCallback() {
                         @Override
                         public void onSuccess() {
-                            // 3. Confirm Print on Backend -> Release Bill Code immediately
+                            // 3. Confirm Print on Backend -> Release Bill Code immediately & mark EXPIRED
                             api.confirmPrint(new OrderModels.ConfirmPrintRequest(order.getId(), operatorId, ptxnId)).enqueue(new Callback<OrderModels.GenericResponse>() {
                                 @Override
                                 public void onResponse(Call<OrderModels.GenericResponse> call, Response<OrderModels.GenericResponse> confirmResp) {
@@ -127,7 +127,7 @@ public class OrderDetailsDialog extends Dialog {
 
                         @Override
                         public void onFailure(String reason) {
-                            // Report print failure -> releases lock so it can be retried
+                            // Report print failure -> releases lock so it can be safely retried
                             api.reportFailure(new OrderModels.PrintFailureRequest(order.getId(), reason, operatorId)).enqueue(new Callback<OrderModels.GenericResponse>() {
                                 @Override
                                 public void onResponse(Call<OrderModels.GenericResponse> call, Response<OrderModels.GenericResponse> response) {}
@@ -140,7 +140,7 @@ public class OrderDetailsDialog extends Dialog {
                         }
                     });
                 } else {
-                    String msg = "Could not claim order: already printed or locked by another terminal";
+                    String msg = "Order has already been processed or locked by another counter.";
                     if (response.body() != null && response.body().getMessage() != null) {
                         msg = response.body().getMessage();
                     }
@@ -151,10 +151,9 @@ public class OrderDetailsDialog extends Dialog {
 
             @Override
             public void onFailure(Call<OrderModels.GenericResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Network error claiming print lock: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Network error while locking order: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 dismiss();
             }
         });
     }
 }
-

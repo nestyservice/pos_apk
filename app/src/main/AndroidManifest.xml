@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- POS Machine Bluetooth & Serial/USB Permissions -->
@@ -15,9 +14,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
-    <!-- Optional Features for broad compatibility -->
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- Optional Features for POS terminal compatibility -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <application
@@ -49,7 +46,7 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="false"
-            android:windowSoftInputMode="stateAlwaysHidden"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait" />
 
         <activity
@@ -57,13 +54,6 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
-        <!-- ZXing Scanner Activity -->
-        <activity
-            android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
-            tools:replace="screenOrientation" />
-
     </application>
 
 </manifest>
-

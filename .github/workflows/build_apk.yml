@@ -46,14 +46,17 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: v1.0.0
-          name: "Nesty POS v1.0.0 (Model 1008 Handheld Terminal)"
+          tag_name: v1.1.0
+          name: "Nesty POS v1.1.0 (Model 1008 - 3-Char Bill Code & Manual Entry)"
           body: |
-            ### Nesty POS APK - Model 1008 Edition
-            - **Platform:** Android 14 (Octa-Core CPU, Dual SIM LTE + Wi-Fi)
-            - **Printer:** Built-in 2-inch (58mm, 32-column) thermal printer
+            ### Nesty POS APK v1.1.0 - Model 1008 Handheld Terminal Edition
+            - **Bill Code Format:** Exactly 3 characters uppercase alphanumeric (e.g., A7B, K2M, P5X).
+            - **Input Mode:** Manual bill code entry with auto-capitalization and format validation.
+            - **Scanner Removed:** QR/barcode scanner and camera permissions completely removed.
+            - **Printer:** Built-in 2-inch (58mm, 32-column) thermal receipt printer with bold NESTY CANTEEN header.
+            - **Lifecycle:** Immediate code reuse upon confirmed print; old orders preserved in Expired Orders History.
+            - **Target Device:** Model 1008 (Octa-core CPU, Android 14, Dual SIM LTE + Wi-Fi).
             - **Backend:** Connected to https://nesty-service-app.onrender.com/
-            - **Workflow:** 5-digit Bill Code verification, instant thermal receipt printing, immediate bill code reuse without collision.
           files: output/nesty-pos.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
