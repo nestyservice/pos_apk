@@ -1,5 +1,6 @@
 package com.nesty.pos.printer;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -12,6 +13,7 @@ import android.util.Log;
 import com.nesty.pos.api.models.OrderModels;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -57,7 +59,7 @@ public class Model1008PrinterDriver implements IPrinterDriver {
 
     @Override
     public void connect() {
-        // 1. Try binding to OEM POS Printer Service via AIDL
+        // Attempt early connection or binding
         for (String action : AIDL_ACTIONS) {
             Intent intent = new Intent(action);
             intent.setPackage(action.substring(0, action.lastIndexOf('.')));
@@ -83,24 +85,10 @@ public class Model1008PrinterDriver implements IPrinterDriver {
                     Log.i(TAG, "Model 1008 AIDL service binding initiated for: " + action);
                     return;
                 }
-            } catch (Exception e) {
-                Log.d(TAG, "AIDL binding skipped for " + action + ": " + e.getMessage());
-            }
-        }
-
-        // 2. Direct internal serial ports
-        for (String portPath : SERIAL_PORTS) {
-            File port = new File(portPath);
-            if (port.exists() && port.canWrite()) {
-                activeSerialPort = port;
-                isConnected = true;
-                Log.i(TAG, "Found writable Model 1008 serial thermal port: " + portPath);
-                return;
-            }
+            } catch (Exception ignored) {}
         }
 
         isConnected = true;
-        Log.i(TAG, "Model 1008 Printer Driver initialized in universal multi-layer mode.");
     }
 
     @Override
@@ -114,15 +102,10 @@ public class Model1008PrinterDriver implements IPrinterDriver {
         new Thread(() -> {
             try {
                 byte[] rawEscPos = EscPosBuilder.buildReceiptBytes(order, terminalId);
-                boolean success = dispatchPrintHeadBytes(rawEscPos);
-
-                if (success) {
-                    if (callback != null) callback.onSuccess();
-                } else {
-                    if (callback != null) callback.onFailure("Could not write to thermal print head. Check paper and printer status.");
-                }
+                dispatchPrintHeadBytes(rawEscPos);
+                if (callback != null) callback.onSuccess();
             } catch (Exception e) {
-                Log.e(TAG, "Print receipt error: " + e.getMessage(), e);
+                Log.e(TAG, "Physical print failed: " + e.getMessage(), e);
                 if (callback != null) callback.onFailure(e.getMessage());
             }
         }).start();
@@ -131,8 +114,12 @@ public class Model1008PrinterDriver implements IPrinterDriver {
     @Override
     public void feedPaper(int lines) {
         new Thread(() -> {
-            byte[] feed = new byte[]{0x1B, 0x64, (byte) Math.max(1, lines)};
-            dispatchPrintHeadBytes(feed);
+            try {
+                byte[] feed = new byte[]{0x1B, 0x64, (byte) Math.max(1, lines)};
+                dispatchPrintHeadBytes(feed);
+            } catch (Exception e) {
+                Log.e(TAG, "Feed paper failed: " + e.getMessage(), e);
+            }
         }).start();
     }
 
@@ -141,68 +128,87 @@ public class Model1008PrinterDriver implements IPrinterDriver {
         new Thread(() -> {
             try {
                 byte[] testBytes = EscPosBuilder.buildTestPrintBytes("POS-1008");
-                boolean ok = dispatchPrintHeadBytes(testBytes);
-                if (ok && callback != null) {
-                    callback.onSuccess();
-                } else if (callback != null) {
-                    callback.onFailure("Failed to write to print head.");
-                }
+                dispatchPrintHeadBytes(testBytes);
+                if (callback != null) callback.onSuccess();
             } catch (Exception e) {
+                Log.e(TAG, "Test print failed: " + e.getMessage(), e);
                 if (callback != null) callback.onFailure(e.getMessage());
             }
         }).start();
     }
 
     /**
-     * Dispatches raw ESC/POS command bytes to the physical hardware via:
-     * Layer 1: Internal Bluetooth RFCOMM Socket (SPP)
-     * Layer 2: OEM AIDL Service Binder
-     * Layer 3: Direct internal hardware Serial device node
+     * Sends ESC/POS data to the physical print head.
+     * Throws an IOException if all physical outputs fail, so the UI NEVER claims success falsely!
      */
-    private synchronized boolean dispatchPrintHeadBytes(byte[] data) {
-        if (data == null || data.length == 0) return false;
-
-        // Layer 1: Internal Bluetooth Printer (Standard on Model 1008 / ATPOS terminals)
-        if (printViaBluetoothSpp(data)) {
-            Log.i(TAG, "Successfully printed " + data.length + " bytes via Bluetooth thermal socket.");
-            return true;
+    @SuppressLint("MissingPermission")
+    private synchronized void dispatchPrintHeadBytes(byte[] data) throws IOException {
+        if (data == null || data.length == 0) {
+            throw new IOException("No print data generated.");
         }
 
-        // Layer 2: OEM AIDL Binder Service
-        if (printViaAidlService(data)) {
-            Log.i(TAG, "Successfully printed " + data.length + " bytes via OEM AIDL service.");
-            return true;
+        StringBuilder failureReasons = new StringBuilder();
+
+        // 1. Direct hardware connection to 'InnerPrinter' via Bluetooth SPP (Verified on Model 1008)
+        try {
+            if (printViaBluetoothSpp(data)) {
+                return;
+            }
+        } catch (Exception e) {
+            failureReasons.append("[Bluetooth InnerPrinter: ").append(e.getMessage()).append("] ");
         }
 
-        // Layer 3: Direct Serial Device node
-        if (printViaSerialDevice(data)) {
-            Log.i(TAG, "Successfully printed " + data.length + " bytes via internal serial device node.");
-            return true;
+        // 2. OEM AIDL Service Binder
+        try {
+            if (printViaAidlService(data)) {
+                return;
+            }
+        } catch (Exception e) {
+            failureReasons.append("[AIDL Service: ").append(e.getMessage()).append("] ");
         }
 
-        Log.w(TAG, "All direct hardware channels exhausted. Emulating print head confirmation.");
-        return true;
+        // 3. Serial Device Port
+        try {
+            if (printViaSerialDevice(data)) {
+                return;
+            }
+        } catch (Exception e) {
+            failureReasons.append("[Serial: ").append(e.getMessage()).append("] ");
+        }
+
+        // Physical print failed on all channels!
+        throw new IOException("Could not print receipt to InnerPrinter. " + failureReasons.toString());
     }
 
-    /**
-     * Connects to internal Bluetooth Thermal printer (InnerPrinter / Bluetooth Printer / POS)
-     */
-    private boolean printViaBluetoothSpp(byte[] data) {
-        try {
-            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-            if (adapter == null || !adapter.isEnabled()) {
-                return false;
+    @SuppressLint("MissingPermission")
+    private boolean printViaBluetoothSpp(byte[] data) throws IOException {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            throw new IOException("Device does not support Bluetooth.");
+        }
+
+        if (!adapter.isEnabled()) {
+            throw new IOException("Bluetooth is turned OFF. Please swipe down from top of POS screen and turn ON Bluetooth.");
+        }
+
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+        if (pairedDevices == null || pairedDevices.isEmpty()) {
+            throw new IOException("No paired devices found. Please ensure InnerPrinter is paired under Android Settings -> Connected Devices.");
+        }
+
+        BluetoothDevice targetPrinter = null;
+
+        // Exact match for "InnerPrinter" (as shown in device settings)
+        for (BluetoothDevice dev : pairedDevices) {
+            String name = dev.getName() != null ? dev.getName().trim() : "";
+            if ("InnerPrinter".equalsIgnoreCase(name)) {
+                targetPrinter = dev;
+                break;
             }
+        }
 
-            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-            if (pairedDevices == null || pairedDevices.isEmpty()) {
-                Log.d(TAG, "No bonded Bluetooth devices found.");
-                return false;
-            }
-
-            BluetoothDevice targetPrinter = null;
-
-            // 1. Prioritize devices with printer names
+        // Fallback: search for inner / printer / pos / 1008
+        if (targetPrinter == null) {
             for (BluetoothDevice dev : pairedDevices) {
                 String name = dev.getName() != null ? dev.getName().toLowerCase() : "";
                 if (name.contains("inner") || name.contains("print") || name.contains("pos") ||
@@ -212,36 +218,79 @@ public class Model1008PrinterDriver implements IPrinterDriver {
                     break;
                 }
             }
+        }
 
-            // 2. If no name matched, use the first paired device if only 1 device is paired
-            if (targetPrinter == null && pairedDevices.size() == 1) {
-                targetPrinter = pairedDevices.iterator().next();
-            }
+        // If only 1 paired device exists, use it
+        if (targetPrinter == null && pairedDevices.size() == 1) {
+            targetPrinter = pairedDevices.iterator().next();
+        }
 
-            if (targetPrinter == null) {
-                Log.d(TAG, "No matching printer device among paired Bluetooth devices.");
-                return false;
-            }
+        if (targetPrinter == null) {
+            throw new IOException("InnerPrinter not found in paired devices list. Found: " + pairedDevices.size() + " other devices.");
+        }
 
-            Log.i(TAG, "Connecting to Bluetooth Thermal Printer: " + targetPrinter.getName() + " [" + targetPrinter.getAddress() + "]");
+        Log.i(TAG, "Opening physical connection to: " + targetPrinter.getName() + " (" + targetPrinter.getAddress() + ")");
 
-            BluetoothSocket socket = targetPrinter.createRfcommSocketToServiceRecord(SPP_UUID);
+        // Cancel discovery to prevent connection drop/timeout
+        adapter.cancelDiscovery();
+
+        BluetoothSocket socket = null;
+        IOException lastException = null;
+
+        // Method 1: Standard SPP UUID
+        try {
+            socket = targetPrinter.createRfcommSocketToServiceRecord(SPP_UUID);
             socket.connect();
+        } catch (IOException e1) {
+            Log.w(TAG, "SPP UUID connection failed: " + e1.getMessage() + ", trying RFCOMM Channel 1 fallback...");
+            lastException = e1;
+            try {
+                if (socket != null) socket.close();
+            } catch (Exception ignored) {}
+            socket = null;
+        }
 
-            OutputStream out = socket.getOutputStream();
-            out.write(data);
-            out.flush();
+        // Method 2: Direct RFCOMM Channel 1 (Reflection - standard for POS micro-controllers)
+        if (socket == null) {
+            try {
+                Method m = targetPrinter.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+                socket = (BluetoothSocket) m.invoke(targetPrinter, 1);
+                socket.connect();
+            } catch (Exception e2) {
+                Log.w(TAG, "RFCOMM Channel 1 connection failed: " + e2.getMessage() + ", trying Insecure RFCOMM Channel 1...");
+                lastException = new IOException("Channel 1 reflection failed: " + e2.getMessage(), e2);
+                try {
+                    if (socket != null) socket.close();
+                } catch (Exception ignored) {}
+                socket = null;
+            }
+        }
 
-            Thread.sleep(150); // Allow hardware print head buffer to clear
-            socket.close();
+        // Method 3: Insecure RFCOMM Channel 1 (Bypasses authentication handshakes)
+        if (socket == null) {
+            try {
+                Method m2 = targetPrinter.getClass().getMethod("createInsecureRfcommSocket", new Class[]{int.class});
+                socket = (BluetoothSocket) m2.invoke(targetPrinter, 1);
+                socket.connect();
+            } catch (Exception e3) {
+                Log.e(TAG, "Insecure RFCOMM failed: " + e3.getMessage());
+                throw new IOException("Cannot connect to InnerPrinter (" + targetPrinter.getAddress() + "). Error: " + (lastException != null ? lastException.getMessage() : e3.getMessage()));
+            }
+        }
+
+        // Send ESC/POS data to the print head
+        try {
+            OutputStream os = socket.getOutputStream();
+            os.write(data);
+            os.flush();
+
+            // Give the hardware motor time to advance the paper roll
+            Thread.sleep(300);
             return true;
-
-        } catch (SecurityException se) {
-            Log.w(TAG, "Bluetooth permission not granted for printer: " + se.getMessage());
-            return false;
-        } catch (Exception e) {
-            Log.w(TAG, "Bluetooth SPP print attempt failed: " + e.getMessage());
-            return false;
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception ignored) {}
         }
     }
 
@@ -251,7 +300,6 @@ public class Model1008PrinterDriver implements IPrinterDriver {
     private boolean printViaAidlService(byte[] data) {
         if (activeAidlService == null) return false;
         try {
-            // Check for standard OEM print methods: sendRAWData, sendRawData, or printRaw
             Method[] methods = activeAidlService.getClass().getMethods();
             for (Method m : methods) {
                 if (m.getName().equalsIgnoreCase("sendRAWData") || m.getName().equalsIgnoreCase("sendRawData")) {
@@ -287,7 +335,7 @@ public class Model1008PrinterDriver implements IPrinterDriver {
 
         for (String portPath : SERIAL_PORTS) {
             File p = new File(portPath);
-            if (p.exists()) {
+            if (p.exists() && p.canWrite()) {
                 try (FileOutputStream fos = new FileOutputStream(p)) {
                     fos.write(data);
                     fos.flush();

@@ -54,18 +54,26 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         btnFeedPaper.setOnClickListener(v -> {
-            printerDriver.feedPaper(3);
-            Toast.makeText(this, "Paper fed 3 lines", Toast.LENGTH_SHORT).show();
+            btnFeedPaper.setEnabled(false);
+            new Thread(() -> {
+                printerDriver.feedPaper(3);
+                runOnUiThread(() -> {
+                    btnFeedPaper.setEnabled(true);
+                    Toast.makeText(SettingsActivity.this, "Paper feed sent to InnerPrinter", Toast.LENGTH_SHORT).show();
+                });
+            }).start();
         });
 
         btnTestPrint.setOnClickListener(v -> {
             btnTestPrint.setEnabled(false);
+            btnTestPrint.setText("TESTING...");
             printerDriver.testPrint(new IPrinterDriver.PrintCallback() {
                 @Override
                 public void onSuccess() {
                     runOnUiThread(() -> {
                         btnTestPrint.setEnabled(true);
-                        Toast.makeText(SettingsActivity.this, "Test receipt printed successfully!", Toast.LENGTH_SHORT).show();
+                        btnTestPrint.setText("Test Print");
+                        Toast.makeText(SettingsActivity.this, "Test receipt printed successfully on InnerPrinter!", Toast.LENGTH_SHORT).show();
                     });
                 }
 
@@ -73,6 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
                 public void onFailure(String reason) {
                     runOnUiThread(() -> {
                         btnTestPrint.setEnabled(true);
+                        btnTestPrint.setText("Test Print");
                         Toast.makeText(SettingsActivity.this, "Printer error: " + reason, Toast.LENGTH_LONG).show();
                     });
                 }
@@ -88,4 +97,3 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 }
-

@@ -46,17 +46,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: v1.2.0
-          name: "Nesty POS v1.2.0 (High-Contrast UI & Model 1008 Multi-Layer Thermal Print)"
+          tag_name: v1.3.0
+          name: "Nesty POS v1.3.0 (InnerPrinter Direct SPP Channel 1 & Robust Thermal Printing)"
           body: |
-            ### Nesty POS APK v1.2.0
-            - **High Contrast UI:** Force Light Theme with crisp dark burgundy/black text for Operator ID and password inputs (fixes white-on-white text in dark mode).
-            - **Spacious Order Details Popup:** Full 92% screen width, eliminating horizontal squishing and line breaks on POS screen.
-            - **Multi-Layer Thermal Printing:** 
-              - Direct Bluetooth SPP socket to internal thermal print head (InnerPrinter / POS-1008 / POS58 / MTP).
-              - OEM AIDL service binder with Android 14 package visibility queries.
-              - Internal Linux serial port stream (/dev/ttyS*).
-            - **Non-blocking UI:** Safe main-thread execution preventing stuck PRINTING... button state.
+            ### Nesty POS APK v1.3.0 - InnerPrinter Direct SPP Channel 1 Integration
+            - **Exact Hardware Integration:** Targets device 'InnerPrinter' directly via Bluetooth SPP socket (UUID 00001101-0000-1000-8000-00805F9B34FB) with automatic reflection fallback to RFCOMM Channel 1.
+            - **Discovery Cancelation:** Cancels Bluetooth discovery before connecting to guarantee fast, non-blocking connection.
+            - **No Fake Success:** Reports physical write failures honestly so orders remain active and can be retried if out of paper or disconnected.
+            - **Android 14 Permissions:** Declares BLUETOOTH_CONNECT and BLUETOOTH_SCAN (neverForLocation) and prompts at runtime.
+            - **High Contrast UI:** Force Light Theme with dark burgundy/black text.
+            - **Spacious Order Details Dialog:** 92% screen width, eliminating horizontal squishing.
           files: output/nesty-pos.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
