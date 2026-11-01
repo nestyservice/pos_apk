@@ -95,3 +95,4 @@ com.nesty.pos
 Every push to the `main` branch triggers `.github/workflows/build_apk.yml`:
 - Compiles the release APK using Ubuntu Android SDK 34 runner.
 - Publishes installable release APK to **GitHub Releases**.
+

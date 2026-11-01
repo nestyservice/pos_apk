@@ -24,3 +24,4 @@ public class PosStatusResponse {
     public int getActiveOrdersCount() { return activeOrdersCount; }
     public String getTimestamp() { return timestamp; }
 }
+

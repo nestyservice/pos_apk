@@ -28,3 +28,4 @@ public interface NestyApiService {
     @POST("api/pos/report-print-failure")
     Call<OrderModels.GenericResponse> reportFailure(@Body OrderModels.PrintFailureRequest request);
 }
+

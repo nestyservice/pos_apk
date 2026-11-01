@@ -167,3 +167,4 @@ public class Model1008PrinterDriver implements IPrinterDriver {
         return true;
     }
 }
+

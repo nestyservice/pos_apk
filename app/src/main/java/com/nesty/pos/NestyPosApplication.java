@@ -30,3 +30,4 @@ public class NestyPosApplication extends Application {
         return printerDriver;
     }
 }
+

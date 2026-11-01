@@ -16,3 +16,4 @@ public interface IPrinterDriver {
     void feedPaper(int lines);
     void testPrint(PrintCallback callback);
 }
+

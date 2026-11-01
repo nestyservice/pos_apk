@@ -141,3 +141,4 @@ public class EscPosBuilder {
         return String.format(Locale.getDefault(), "%-16s %4s %10s\n", n, qty, price);
     }
 }
+

@@ -34,6 +34,7 @@ jobs:
         run: |
           mkdir -p output
           cp app/build/outputs/apk/debug/app-debug.apk output/nesty-pos.apk
+          ls -la output/
 
       - name: Upload APK Build Artifact
         uses: actions/upload-artifact@v4
