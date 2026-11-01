@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import com.nesty.pos.api.models.OrderModels;
@@ -155,7 +157,8 @@ public class Model1008PrinterDriver implements IPrinterDriver {
                 return;
             }
         } catch (Exception e) {
-            failureReasons.append("[Bluetooth InnerPrinter: ").append(e.getMessage()).append("] ");
+            Log.w(TAG, "Bluetooth InnerPrinter error: " + e.getMessage());
+            failureReasons.append("[InnerPrinter Bluetooth: ").append(e.getMessage()).append("] ");
         }
 
         // 2. OEM AIDL Service Binder
@@ -182,6 +185,12 @@ public class Model1008PrinterDriver implements IPrinterDriver {
 
     @SuppressLint("MissingPermission")
     private boolean printViaBluetoothSpp(byte[] data) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                throw new IOException("Bluetooth Connect permission not granted. Please allow Bluetooth permission when prompted.");
+            }
+        }
+
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
             throw new IOException("Device does not support Bluetooth.");
@@ -232,50 +241,81 @@ public class Model1008PrinterDriver implements IPrinterDriver {
         Log.i(TAG, "Opening physical connection to: " + targetPrinter.getName() + " (" + targetPrinter.getAddress() + ")");
 
         // Cancel discovery to prevent connection drop/timeout
-        adapter.cancelDiscovery();
+        if (adapter.isDiscovering()) {
+            adapter.cancelDiscovery();
+        }
 
         BluetoothSocket socket = null;
-        IOException lastException = null;
+        Exception lastException = null;
 
         // Method 1: Standard SPP UUID
         try {
             socket = targetPrinter.createRfcommSocketToServiceRecord(SPP_UUID);
             socket.connect();
-        } catch (IOException e1) {
-            Log.w(TAG, "SPP UUID connection failed: " + e1.getMessage() + ", trying RFCOMM Channel 1 fallback...");
+        } catch (Exception e1) {
+            Log.w(TAG, "SPP UUID connection failed: " + e1.getMessage() + ", trying Insecure SPP UUID...");
             lastException = e1;
-            try {
-                if (socket != null) socket.close();
-            } catch (Exception ignored) {}
+            closeQuietly(socket);
             socket = null;
         }
 
-        // Method 2: Direct RFCOMM Channel 1 (Reflection - standard for POS micro-controllers)
+        // Method 2: Insecure SPP UUID
         if (socket == null) {
             try {
-                Method m = targetPrinter.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-                socket = (BluetoothSocket) m.invoke(targetPrinter, 1);
+                socket = targetPrinter.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
                 socket.connect();
             } catch (Exception e2) {
-                Log.w(TAG, "RFCOMM Channel 1 connection failed: " + e2.getMessage() + ", trying Insecure RFCOMM Channel 1...");
-                lastException = new IOException("Channel 1 reflection failed: " + e2.getMessage(), e2);
-                try {
-                    if (socket != null) socket.close();
-                } catch (Exception ignored) {}
+                Log.w(TAG, "Insecure SPP UUID failed: " + e2.getMessage() + ", trying RFCOMM Channel 1...");
+                lastException = e2;
+                closeQuietly(socket);
                 socket = null;
             }
         }
 
-        // Method 3: Insecure RFCOMM Channel 1 (Bypasses authentication handshakes)
+        // Method 3: Direct RFCOMM Channel 1 (Reflection - standard for POS micro-controllers)
         if (socket == null) {
             try {
-                Method m2 = targetPrinter.getClass().getMethod("createInsecureRfcommSocket", new Class[]{int.class});
-                socket = (BluetoothSocket) m2.invoke(targetPrinter, 1);
-                socket.connect();
+                Method m;
+                try {
+                    m = targetPrinter.getClass().getMethod("createRfcommSocket", int.class);
+                } catch (NoSuchMethodException nsme) {
+                    m = targetPrinter.getClass().getDeclaredMethod("createRfcommSocket", int.class);
+                }
+                m.setAccessible(true);
+                socket = (BluetoothSocket) m.invoke(targetPrinter, 1);
+                if (socket != null) {
+                    socket.connect();
+                }
             } catch (Exception e3) {
-                Log.e(TAG, "Insecure RFCOMM failed: " + e3.getMessage());
-                throw new IOException("Cannot connect to InnerPrinter (" + targetPrinter.getAddress() + "). Error: " + (lastException != null ? lastException.getMessage() : e3.getMessage()));
+                Log.w(TAG, "RFCOMM Channel 1 connection failed: " + e3.getMessage() + ", trying Insecure RFCOMM Channel 1...");
+                lastException = e3;
+                closeQuietly(socket);
+                socket = null;
             }
+        }
+
+        // Method 4: Insecure RFCOMM Channel 1 (Bypasses authentication handshakes)
+        if (socket == null) {
+            try {
+                Method m2;
+                try {
+                    m2 = targetPrinter.getClass().getMethod("createInsecureRfcommSocket", int.class);
+                } catch (NoSuchMethodException nsme) {
+                    m2 = targetPrinter.getClass().getDeclaredMethod("createInsecureRfcommSocket", int.class);
+                }
+                m2.setAccessible(true);
+                socket = (BluetoothSocket) m2.invoke(targetPrinter, 1);
+                if (socket != null) {
+                    socket.connect();
+                }
+            } catch (Exception e4) {
+                Log.e(TAG, "Insecure RFCOMM failed: " + e4.getMessage());
+                throw new IOException("Cannot connect to InnerPrinter (" + targetPrinter.getAddress() + "). Error: " + (lastException != null ? lastException.getMessage() : e4.getMessage()));
+            }
+        }
+
+        if (socket == null) {
+            throw new IOException("Could not establish socket to InnerPrinter (" + targetPrinter.getAddress() + ")");
         }
 
         // Send ESC/POS data to the print head
@@ -285,9 +325,18 @@ public class Model1008PrinterDriver implements IPrinterDriver {
             os.flush();
 
             // Give the hardware motor time to advance the paper roll
-            Thread.sleep(300);
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ignored) {}
+
             return true;
         } finally {
+            closeQuietly(socket);
+        }
+    }
+
+    private void closeQuietly(BluetoothSocket socket) {
+        if (socket != null) {
             try {
                 socket.close();
             } catch (Exception ignored) {}
