@@ -3,6 +3,11 @@ package com.nesty.pos.ui;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,9 +35,12 @@ public class OrderDetailsDialog extends Dialog {
     private final OnPrintCompletedListener listener;
     private final SessionManager sessionManager;
     private final Model1008PrinterDriver printerDriver;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Button btnDialogPrint;
+    private Button btnDialogCancel;
 
     public OrderDetailsDialog(@NonNull Context context, OrderModels.OrderRecord order, OnPrintCompletedListener listener) {
-        super(context);
+        super(context, R.style.Theme_NestyPOS_Dialog);
         this.order = order;
         this.listener = listener;
         this.sessionManager = NestyPosApplication.getInstance().getSessionManager();
@@ -55,8 +63,8 @@ public class OrderDetailsDialog extends Dialog {
         TextView tvDialogTxnId = findViewById(R.id.tvDialogTxnId);
         TextView tvDialogItems = findViewById(R.id.tvDialogItems);
         TextView tvDialogTotalAmount = findViewById(R.id.tvDialogTotalAmount);
-        Button btnDialogCancel = findViewById(R.id.btnDialogCancel);
-        Button btnDialogPrint = findViewById(R.id.btnDialogPrint);
+        btnDialogCancel = findViewById(R.id.btnDialogCancel);
+        btnDialogPrint = findViewById(R.id.btnDialogPrint);
 
         tvDialogOrderId.setText("Order #" + order.getId());
 
@@ -65,7 +73,7 @@ public class OrderDetailsDialog extends Dialog {
             codesText += "Bill Code: " + order.getBillCode();
         }
         if (order.getPickupToken() != null && !order.getPickupToken().isEmpty()) {
-            if (!codesText.isEmpty()) codesText += " | ";
+            if (!codesText.isEmpty()) codesText += " • ";
             codesText += "Token: " + order.getPickupToken();
         }
         tvDialogBillCode.setText(codesText);
@@ -74,14 +82,16 @@ public class OrderDetailsDialog extends Dialog {
         tvDialogTxnId.setText("Txn: " + (order.getTransactionId() != null ? order.getTransactionId() : "N/A"));
 
         StringBuilder itemsText = new StringBuilder();
-        if (order.getItems() != null) {
+        if (order.getItems() != null && !order.getItems().isEmpty()) {
             for (OrderModels.OrderItem it : order.getItems()) {
                 itemsText.append("• ")
                     .append(it.getQuantity())
                     .append("x ")
                     .append(it.getName())
-                    .append(String.format(Locale.getDefault(), " (Rs.%.2f)\n", it.getPrice() * it.getQuantity()));
+                    .append(String.format(Locale.getDefault(), " (Rs. %.2f)\n", it.getPrice() * it.getQuantity()));
             }
+        } else {
+            itemsText.append("• Food Order (Total Paid)");
         }
         tvDialogItems.setText(itemsText.toString().trim());
         tvDialogTotalAmount.setText(String.format(Locale.getDefault(), "Rs. %.2f", order.getFinalAmount()));
@@ -95,10 +105,29 @@ public class OrderDetailsDialog extends Dialog {
         });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (getWindow() != null) {
+            DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+            int width = Math.min((int) (metrics.widthPixels * 0.92), 480);
+            getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            getWindow().setGravity(Gravity.CENTER);
+        }
+    }
+
     private void executePrintFlow() {
         NestyApiService api = ApiClient.getService(getContext());
         String operatorId = sessionManager.getOperatorName();
         String ptxnId = "ptxn_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
+
+        // Safety timeout (8 seconds): never leave button permanently stuck on PRINTING...
+        mainHandler.postDelayed(() -> {
+            if (isShowing() && btnDialogPrint != null && !btnDialogPrint.isEnabled()) {
+                btnDialogPrint.setEnabled(true);
+                btnDialogPrint.setText("RETRY PRINT");
+            }
+        }, 8000);
 
         // 1. Acquire Atomic Claim Lock (45 seconds)
         api.claimOrder(new OrderModels.ClaimRequest(order.getId(), operatorId, ptxnId)).enqueue(new Callback<OrderModels.GenericResponse>() {
@@ -113,14 +142,19 @@ public class OrderDetailsDialog extends Dialog {
                             api.confirmPrint(new OrderModels.ConfirmPrintRequest(order.getId(), operatorId, ptxnId)).enqueue(new Callback<OrderModels.GenericResponse>() {
                                 @Override
                                 public void onResponse(Call<OrderModels.GenericResponse> call, Response<OrderModels.GenericResponse> confirmResp) {
-                                    dismiss();
-                                    if (listener != null) listener.onCompleted();
+                                    mainHandler.post(() -> {
+                                        Toast.makeText(getContext(), "Receipt printed successfully!", Toast.LENGTH_SHORT).show();
+                                        dismiss();
+                                        if (listener != null) listener.onCompleted();
+                                    });
                                 }
 
                                 @Override
                                 public void onFailure(Call<OrderModels.GenericResponse> call, Throwable t) {
-                                    dismiss();
-                                    if (listener != null) listener.onCompleted();
+                                    mainHandler.post(() -> {
+                                        dismiss();
+                                        if (listener != null) listener.onCompleted();
+                                    });
                                 }
                             });
                         }
@@ -135,8 +169,13 @@ public class OrderDetailsDialog extends Dialog {
                                 public void onFailure(Call<OrderModels.GenericResponse> call, Throwable t) {}
                             });
 
-                            Toast.makeText(getContext(), "Printer error: " + reason + ". Order remains active.", Toast.LENGTH_LONG).show();
-                            dismiss();
+                            mainHandler.post(() -> {
+                                if (btnDialogPrint != null) {
+                                    btnDialogPrint.setEnabled(true);
+                                    btnDialogPrint.setText("RETRY PRINT");
+                                }
+                                Toast.makeText(getContext(), "Printer notice: " + reason + ". Tap RETRY PRINT or check paper.", Toast.LENGTH_LONG).show();
+                            });
                         }
                     });
                 } else {
@@ -144,15 +183,23 @@ public class OrderDetailsDialog extends Dialog {
                     if (response.body() != null && response.body().getMessage() != null) {
                         msg = response.body().getMessage();
                     }
-                    Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
-                    dismiss();
+                    final String alertMsg = msg;
+                    mainHandler.post(() -> {
+                        Toast.makeText(getContext(), alertMsg, Toast.LENGTH_LONG).show();
+                        dismiss();
+                    });
                 }
             }
 
             @Override
             public void onFailure(Call<OrderModels.GenericResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Network error while locking order: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                dismiss();
+                mainHandler.post(() -> {
+                    if (btnDialogPrint != null) {
+                        btnDialogPrint.setEnabled(true);
+                        btnDialogPrint.setText("PRINT BILL");
+                    }
+                    Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                });
             }
         });
     }

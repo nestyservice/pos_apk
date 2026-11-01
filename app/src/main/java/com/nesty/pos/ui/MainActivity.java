@@ -1,12 +1,13 @@
 package com.nesty.pos.ui;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         sessionManager = NestyPosApplication.getInstance().getSessionManager();
 
+        requestBluetoothPermissionsIfNeeded();
         initViews();
         checkServerHealth();
     }
@@ -51,6 +53,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         checkServerHealth();
+    }
+
+    private void requestBluetoothPermissionsIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                    android.Manifest.permission.BLUETOOTH_SCAN
+                }, 101);
+            }
+        }
     }
 
     private void initViews() {
@@ -104,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void validateAndVerifyOrder(String code) {
-        // Validation 1: Empty
         if (code.isEmpty()) {
             showValidationMessage("Please enter a bill code.", true);
             Toast.makeText(this, "Please enter a bill code.", Toast.LENGTH_SHORT).show();
@@ -112,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Validation 2: Exact 3 characters
         if (code.length() != 3) {
             showValidationMessage("Bill code must contain exactly 3 characters.", true);
             Toast.makeText(this, "Bill code must contain exactly 3 characters.", Toast.LENGTH_SHORT).show();
@@ -120,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Validation 3: Must contain both a letter and a number
         boolean hasLetter = false;
         boolean hasDigit = false;
         for (char c : code.toCharArray()) {
@@ -135,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Proceed to backend order verification
         setVerifying(true);
         showValidationMessage("Verifying code " + code + " on server...", false);
 
@@ -195,9 +204,9 @@ public class MainActivity extends AppCompatActivity {
     private void showValidationMessage(String message, boolean isError) {
         tvStatusMessage.setText(message);
         if (isError) {
-            tvStatusMessage.setTextColor(Color.parseColor("#DC2626")); // Error red
+            tvStatusMessage.setTextColor(Color.parseColor("#DC2626"));
         } else {
-            tvStatusMessage.setTextColor(Color.parseColor("#059669")); // Emerald green
+            tvStatusMessage.setTextColor(Color.parseColor("#059669"));
         }
     }
 

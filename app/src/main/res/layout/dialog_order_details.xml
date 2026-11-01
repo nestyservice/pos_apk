@@ -3,11 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minWidth="320dp"
     android:orientation="vertical"
     android:background="@drawable/bg_dialog_rounded"
     android:padding="20dp">
 
-    <!-- Header -->
+    <!-- Header Row: Order ID + Status Badge -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,19 +26,21 @@
                 android:id="@+id/tvDialogOrderId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Order #NST-8492"
+                android:text="Order #12345"
                 android:textColor="@color/nesty_burgundy"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-black" />
 
             <TextView
                 android:id="@+id/tvDialogBillCode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bill Code: 10245 • Token: A7K"
-                android:textColor="@color/nesty_text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:text="Bill Code: A7B"
+                android:textColor="@color/nesty_burgundy_dark"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <TextView
@@ -47,28 +50,28 @@
             android:text="PAID"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:background="@drawable/bg_badge_paid"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp" />
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp" />
     </LinearLayout>
 
-    <!-- Student Info Row -->
+    <!-- Student Details Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_card_cream"
         android:padding="12dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="14dp">
 
         <TextView
             android:id="@+id/tvDialogStudentName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Student: Aarav Reddy (22B81A0501)"
+            android:text="Student: Test Student"
             android:textColor="@color/nesty_text_primary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -77,34 +80,41 @@
             android:id="@+id/tvDialogTxnId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Txn: pay_P9xK2m81L"
+            android:text="Txn Ref: TXN123456"
             android:textColor="@color/nesty_text_secondary"
             android:textSize="11sp"
             android:layout_marginTop="2dp" />
     </LinearLayout>
 
-    <!-- Items List Container -->
+    <!-- Items Section Header -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ITEMS ORDERED"
         android:textColor="@color/nesty_text_secondary"
-        android:textSize="10sp"
+        android:textSize="11sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1"
+        android:letterSpacing="0.08"
         android:layout_marginBottom="6dp" />
 
-    <TextView
-        android:id="@+id/tvDialogItems"
+    <!-- Items Scrollable Content -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="• 2x Veg Puff (₹50.00)\n• 2x Samosa (₹24.00)"
-        android:textColor="@color/nesty_text_primary"
-        android:textSize="14sp"
-        android:lineSpacingExtra="4dp"
-        android:layout_marginBottom="14dp" />
+        android:maxHeight="160dp"
+        android:layout_marginBottom="12dp">
 
-    <!-- Total Amount Paid Row -->
+        <TextView
+            android:id="@+id/tvDialogItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• 2x Samosa (Rs. 24.00)\n• 1x Cold Coffee (Rs. 60.00)"
+            android:textColor="@color/nesty_text_primary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="5dp" />
+    </ScrollView>
+
+    <!-- Total Amount Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -119,50 +129,51 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="TOTAL PAID:"
+            android:text="TOTAL AMOUNT:"
             android:textColor="@color/nesty_burgundy"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDialogTotalAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="₹74.00"
+            android:text="Rs. 84.00"
             android:textColor="@color/nesty_burgundy"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Action Buttons: Print Bill vs Cancel -->
+    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDialogCancel"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_weight="1"
-            android:text="Cancel"
+            android:text="Close"
             android:textColor="@color/nesty_text_secondary"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_marginEnd="6dp" />
+            android:textSize="14sp"
+            android:layout_marginEnd="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDialogPrint"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:layout_weight="2"
             android:text="PRINT BILL"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:backgroundTint="@color/nesty_burgundy"
             app:cornerRadius="14dp"
-            android:layout_marginStart="6dp" />
+            android:layout_marginStart="4dp" />
     </LinearLayout>
 
 </LinearLayout>
-

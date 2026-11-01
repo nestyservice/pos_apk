@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="nesty"
+                android:text="NESTY POS"
                 android:textColor="@color/nesty_burgundy"
                 android:textSize="36sp"
                 android:textStyle="bold"
@@ -34,16 +34,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="COUNTER POS TERMINAL"
+                android:text="COUNTER OPERATOR LOGIN"
                 android:textColor="@color/nesty_burgundy_dark"
-                android:textSize="11sp"
-                android:letterSpacing="0.2"
-                android:textStyle="bold" />
+                android:textSize="12sp"
+                android:letterSpacing="0.15"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Model 1008 • Dual SIM LTE / Wi-Fi"
+                android:text="Model 1008 • Built-in Thermal Printer"
                 android:textColor="@color/nesty_text_secondary"
                 android:textSize="11sp"
                 android:layout_marginTop="4dp" />
@@ -62,12 +63,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="22dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Operator Sign In"
+                    android:text="Sign In to Terminal"
                     android:textColor="@color/nesty_burgundy"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -77,37 +78,48 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_operator_id"
+                    android:hint="Operator ID or Email"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:boxStrokeColor="@color/nesty_burgundy"
-                    android:layout_marginBottom="12dp">
+                    app:hintTextColor="@color/nesty_burgundy"
+                    android:textColorHint="@color/nesty_text_secondary"
+                    android:layout_marginBottom="14dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etIdentifier"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="operator@cvr.ac.in"
+                        android:textColor="@color/nesty_text_primary"
+                        android:textColorHint="@color/nesty_text_secondary"
                         android:inputType="textEmailAddress"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Password / PIN Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_password"
+                    android:hint="Password or PIN"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:boxStrokeColor="@color/nesty_burgundy"
+                    app:hintTextColor="@color/nesty_burgundy"
+                    android:textColorHint="@color/nesty_text_secondary"
                     app:passwordToggleEnabled="true"
-                    android:layout_marginBottom="20dp">
+                    app:passwordToggleTint="@color/nesty_burgundy"
+                    android:layout_marginBottom="22dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="pos123"
+                        android:textColor="@color/nesty_text_primary"
+                        android:textColorHint="@color/nesty_text_secondary"
                         android:inputType="textPassword"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Login Button -->
@@ -115,10 +127,10 @@
                     android:id="@+id/btnLogin"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
-                    android:text="@string/btn_login"
+                    android:text="SIGN IN TO TERMINAL"
                     android:textColor="@color/white"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     app:cornerRadius="14dp"
                     app:backgroundTint="@color/nesty_burgundy" />
 
@@ -139,7 +151,7 @@
             android:id="@+id/tvTerminalHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connects to https://nesty-service-app.onrender.com/"
+            android:text="Server: https://nesty-service-app.onrender.com/"
             android:textColor="@color/nesty_text_secondary"
             android:textSize="11sp"
             android:textAlignment="center"
@@ -147,4 +159,3 @@
 
     </LinearLayout>
 </ScrollView>
-
