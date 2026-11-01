@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nesty_cream"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="@color/nesty_burgundy"
+                android:contentDescription="Back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="POS Settings"
+                android:textColor="@color/nesty_burgundy"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+
+        <!-- Hardware & Device Info Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HARDWARE PROFILE"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Model 1008 Handheld POS"
+                    android:textColor="@color/nesty_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Printer: Built-in 2-inch (58mm) Thermal\nNetwork: Dual SIM 4G LTE + Wi-Fi\nPlatform: Android 14 (Octa-Core)"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Server Configuration Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BACKEND API URL"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etBaseUrl"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="https://nesty-service-app.onrender.com/"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveBaseUrl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Save URL"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/nesty_burgundy"
+                    app:cornerRadius="10dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Printer Actions Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="THERMAL PRINTER TOOLS"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTestPrint"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="@string/btn_test_print"
+                        android:textColor="@color/white"
+                        app:backgroundTint="@color/nesty_burgundy"
+                        app:cornerRadius="12dp"
+                        android:layout_marginEnd="6dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFeedPaper"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="@string/btn_feed"
+                        android:textColor="@color/nesty_burgundy"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/nesty_burgundy"
+                        app:cornerRadius="12dp"
+                        android:layout_marginStart="6dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Sign Out Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Sign Out Terminal"
+            android:textColor="@color/nesty_error"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/nesty_error"
+            app:cornerRadius="14dp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+</ScrollView>

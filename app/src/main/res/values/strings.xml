@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Nesty POS</string>
+    <string name="title_operator_login">Operator Login</string>
+    <string name="hint_operator_id">Operator ID / Email</string>
+    <string name="hint_password">Password / PIN</string>
+    <string name="btn_login">Sign In Terminal</string>
+    <string name="terminal_model">Model 1008 • 58mm Thermal</string>
+    <string name="keypad_title">Enter Bill Code or Token</string>
+    <string name="keypad_placeholder">-----</string>
+    <string name="btn_verify">Verify &amp; Print</string>
+    <string name="btn_scan_qr">Scan QR Pass</string>
+    <string name="btn_clear">CLEAR</string>
+    <string name="btn_feed">Feed Paper</string>
+    <string name="btn_test_print">Test Print</string>
+    <string name="default_base_url">https://nesty-service-app.onrender.com/</string>
+</resources>

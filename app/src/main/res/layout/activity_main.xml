@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/nesty_cream">
+
+    <!-- Top Status Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/nesty_burgundy"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="nesty POS"
+                android:textColor="@color/nesty_gold"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-black" />
+
+            <TextView
+                android:id="@+id/tvOperatorName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Operator: Counter 1"
+                android:textColor="@color/white"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Status Indicator Pill -->
+        <LinearLayout
+            android:id="@+id/pillNetworkStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_status_online"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/ic_dot_green"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tvNetworkStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ONLINE"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- Settings Button -->
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_preferences"
+            app:tint="@color/white"
+            android:contentDescription="Settings" />
+    </LinearLayout>
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Code Display Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/keypad_title"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1" />
+
+                <!-- Large Code Display -->
+                <TextView
+                    android:id="@+id/tvCodeDisplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="-----"
+                    android:textColor="@color/nesty_burgundy"
+                    android:textSize="38sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:gravity="center"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:letterSpacing="0.25" />
+
+                <TextView
+                    android:id="@+id/tvStatusMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Type 5-digit Bill Code, Token, or Scan QR"
+                    android:textColor="@color/nesty_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Keypad Grid (3 columns: 1-9, Clear, 0, Scan) -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:columnCount="3"
+            android:rowCount="4"
+            android:alignmentMode="alignMargins">
+
+            <!-- Row 1: 1, 2, 3 -->
+            <Button
+                android:id="@+id/btn1"
+                style="@style/KeypadButton"
+                android:text="1" />
+            <Button
+                android:id="@+id/btn2"
+                style="@style/KeypadButton"
+                android:text="2" />
+            <Button
+                android:id="@+id/btn3"
+                style="@style/KeypadButton"
+                android:text="3" />
+
+            <!-- Row 2: 4, 5, 6 -->
+            <Button
+                android:id="@+id/btn4"
+                style="@style/KeypadButton"
+                android:text="4" />
+            <Button
+                android:id="@+id/btn5"
+                style="@style/KeypadButton"
+                android:text="5" />
+            <Button
+                android:id="@+id/btn6"
+                style="@style/KeypadButton"
+                android:text="6" />
+
+            <!-- Row 3: 7, 8, 9 -->
+            <Button
+                android:id="@+id/btn7"
+                style="@style/KeypadButton"
+                android:text="7" />
+            <Button
+                android:id="@+id/btn8"
+                style="@style/KeypadButton"
+                android:text="8" />
+            <Button
+                android:id="@+id/btn9"
+                style="@style/KeypadButton"
+                android:text="9" />
+
+            <!-- Row 4: CLEAR, 0, SCAN QR -->
+            <Button
+                android:id="@+id/btnClear"
+                style="@style/KeypadButtonClear"
+                android:text="C" />
+            <Button
+                android:id="@+id/btn0"
+                style="@style/KeypadButton"
+                android:text="0" />
+            <Button
+                android:id="@+id/btnScan"
+                style="@style/KeypadButtonScan"
+                android:text="SCAN" />
+        </GridLayout>
+
+        <!-- Big Verify & Print Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerify"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/btn_verify"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:backgroundTint="@color/nesty_burgundy"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,63 @@
+name: Build Nesty POS APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build APK with Gradle
+        run: ./gradlew assembleDebug assembleRelease --stacktrace
+
+      - name: Copy Release APK to Root Output
+        run: |
+          mkdir -p output
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk output/nesty-pos.apk
+          elif [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp app/build/outputs/apk/release/app-release-unsigned.apk output/nesty-pos.apk
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk output/nesty-pos.apk
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nesty-pos-apk
+          path: output/nesty-pos.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          tag_name: v1.0.0
+          name: "Nesty POS v1.0.0 (Model 1008 Release)"
+          body: |
+            ### Nesty POS Android APK - Model 1008 Handheld Terminal Edition
+            - **Platform:** Android 14 (Octa-Core CPU, Dual SIM LTE + Wi-Fi)
+            - **Printer:** Built-in 2-inch (58mm, 32-column) thermal printer
+            - **Backend:** Connected to https://nesty-service-app.onrender.com/
+            - **Features:** 5-digit Bill Code lookup, QR scanning, atomic claim locking, immediate bill code release upon printing.
+          files: output/nesty-pos.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

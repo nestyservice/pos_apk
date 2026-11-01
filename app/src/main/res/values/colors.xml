@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nesty_burgundy">#5B0612</color>
+    <color name="nesty_burgundy_dark">#3D040C</color>
+    <color name="nesty_gold">#D4AF37</color>
+    <color name="nesty_gold_light">#F5ECCB</color>
+    <color name="nesty_cream">#FFFDF9</color>
+    <color name="nesty_cream_surface">#FDFBF7</color>
+    <color name="nesty_cream_border">#EADBCE</color>
+    <color name="nesty_text_primary">#2A1810</color>
+    <color name="nesty_text_secondary">#7A6A60</color>
+    <color name="nesty_success">#059669</color>
+    <color name="nesty_error">#DC2626</color>
+    <color name="nesty_keypad_bg">#FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
+
