@@ -1,6 +1,7 @@
 package com.nesty.pos;
 
 import android.app.Application;
+import androidx.appcompat.app.AppCompatDelegate;
 import com.nesty.pos.data.SessionManager;
 import com.nesty.pos.printer.Model1008PrinterDriver;
 
@@ -12,6 +13,8 @@ public class NestyPosApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Force Light Mode so Dark Mode on device never inverts text to white
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         instance = this;
         sessionManager = new SessionManager(this);
         printerDriver = new Model1008PrinterDriver(this);

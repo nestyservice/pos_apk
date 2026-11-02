@@ -28,13 +28,15 @@ public class EscPosBuilder {
             // 3. Left Align: Order Info
             out.write(new byte[]{0x1B, 0x61, 0x00}); // Left
             out.write(formatRow("Order ID", "#" + order.getId()).getBytes("UTF-8"));
-            if (order.getBillCode() != null && !order.getBillCode().isEmpty()) {
+            String token = order.getToken();
+            if (token != null && !token.isEmpty()) {
                 out.write(new byte[]{0x1B, 0x45, 0x01}); // Bold ON
-                out.write(formatRow("Bill Code", order.getBillCode()).getBytes("UTF-8"));
+                out.write(formatRow("TOKEN NUMBER", token).getBytes("UTF-8"));
                 out.write(new byte[]{0x1B, 0x45, 0x00}); // Bold OFF
             }
-            if (order.getPickupToken() != null && !order.getPickupToken().isEmpty()) {
-                out.write(formatRow("Pickup Token", order.getPickupToken()).getBytes("UTF-8"));
+            String rollNo = order.getStudentRollNo();
+            if (rollNo != null && !rollNo.isEmpty()) {
+                out.write(formatRow("CVR College ID", rollNo).getBytes("UTF-8"));
             }
 
             String dateStr = new SimpleDateFormat("dd-MMM-yyyy hh:mm a", Locale.getDefault()).format(new Date());

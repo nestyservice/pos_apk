@@ -68,17 +68,14 @@ public class OrderDetailsDialog extends Dialog {
 
         tvDialogOrderId.setText("Order #" + order.getId());
 
-        String codesText = "";
-        if (order.getBillCode() != null && !order.getBillCode().isEmpty()) {
-            codesText += "Bill Code: " + order.getBillCode();
-        }
-        if (order.getPickupToken() != null && !order.getPickupToken().isEmpty()) {
-            if (!codesText.isEmpty()) codesText += " • ";
-            codesText += "Token: " + order.getPickupToken();
-        }
-        tvDialogBillCode.setText(codesText);
+        String tokenStr = order.getToken();
+        tvDialogBillCode.setText("Token: " + (tokenStr != null && !tokenStr.isEmpty() ? tokenStr : "N/A"));
 
-        tvDialogStudentName.setText("Student: " + (order.getStudentName() != null ? order.getStudentName() : "Student"));
+        String studentDisplay = (order.getStudentName() != null ? order.getStudentName() : "Student");
+        if (order.getStudentRollNo() != null && !order.getStudentRollNo().isEmpty()) {
+            studentDisplay += " (CVR: " + order.getStudentRollNo() + ")";
+        }
+        tvDialogStudentName.setText("Student: " + studentDisplay);
         tvDialogTxnId.setText("Txn: " + (order.getTransactionId() != null ? order.getTransactionId() : "N/A"));
 
         StringBuilder itemsText = new StringBuilder();
@@ -110,7 +107,7 @@ public class OrderDetailsDialog extends Dialog {
         super.onStart();
         if (getWindow() != null) {
             DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-            int width = Math.min((int) (metrics.widthPixels * 0.92), 480);
+            int width = (int) (metrics.widthPixels * 0.92);
             getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
             getWindow().setGravity(Gravity.CENTER);
         }

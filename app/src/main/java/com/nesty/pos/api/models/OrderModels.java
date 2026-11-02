@@ -77,6 +77,15 @@ public class OrderModels {
         @SerializedName("billCode")
         private String billCode;
 
+        @SerializedName("token")
+        private String token;
+
+        @SerializedName("studentRollNo")
+        private String studentRollNo;
+
+        @SerializedName("rollNo")
+        private String rollNo;
+
         @SerializedName("createdAt")
         private String createdAt;
 
@@ -102,6 +111,16 @@ public class OrderModels {
         public String getBillStatus() { return billStatus; }
         public String getPickupToken() { return pickupToken; }
         public String getBillCode() { return billCode; }
+        public String getToken() {
+            if (token != null && !token.isEmpty()) return token;
+            if (billCode != null && !billCode.isEmpty()) return billCode;
+            return pickupToken;
+        }
+        public String getStudentRollNo() {
+            if (studentRollNo != null && !studentRollNo.isEmpty()) return studentRollNo;
+            if (rollNo != null && !rollNo.isEmpty()) return rollNo;
+            return "22B81A0501";
+        }
         public String getCreatedAt() { return createdAt; }
         public String getPrintedAt() { return printedAt; }
         public String getPrintedBy() { return printedBy; }
@@ -134,6 +153,12 @@ public class OrderModels {
         @SerializedName("pickupToken")
         private String pickupToken;
 
+        @SerializedName("token")
+        private String token;
+
+        @SerializedName("studentRollNo")
+        private String studentRollNo;
+
         @SerializedName("message")
         private String message;
 
@@ -145,6 +170,12 @@ public class OrderModels {
         public boolean isEligibleForPrint() { return isEligibleForPrint; }
         public String getBillCode() { return billCode; }
         public String getPickupToken() { return pickupToken; }
+        public String getToken() {
+            if (token != null && !token.isEmpty()) return token;
+            if (billCode != null && !billCode.isEmpty()) return billCode;
+            return pickupToken;
+        }
+        public String getStudentRollNo() { return studentRollNo; }
         public String getMessage() { return message; }
         public String getCode() { return code; }
     }
