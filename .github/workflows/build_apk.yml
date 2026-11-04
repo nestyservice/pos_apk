@@ -46,15 +46,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: v1.4.0
-          name: "Nesty POS v1.4.0 (Single Token & CVR College ID Thermal Print)"
+          tag_name: v1.5.0
+          name: "Nesty POS v1.5.0 (POS Device Authentication & Network Security Hardening)"
           body: |
-            ### Nesty POS APK v1.4.0 - Single Token, CVR Roll Number & InnerPrinter SPP
-            - **Single Token Integration:** Removed duplicate pickup tokens and duplicate bill codes. Displays and prints exactly ONE unified 3-character uppercase alphanumeric token.
-            - **CVR College ID Verification:** Displays and prints authenticated student CVR Roll Number (e.g. 22B81A0501) on physical thermal receipts.
-            - **Exact Hardware Integration:** Targets device 'InnerPrinter' directly via Bluetooth SPP socket with RFCOMM Channel 1 fallback.
-            - **Spacious Order Details Dialog:** Fixed 92% screen width responsive layout, eliminating text wrapping and squished buttons on POS machines.
-            - **Forced Light Mode:** Prevents dark mode from inverting inputs to white text.
+            ### Nesty POS APK v1.5.0 - Hardware Security & TLS Hardening
+            - **POS Device Authentication:** Hardware headers (X-POS-Device-Id and X-POS-Device-Key) sent with every API request.
+            - **TLS Network Security Config:** OWASP MASVS compliant strict TLS network security configuration prohibiting cleartext HTTP.
+            - **Backup Disabled:** android:allowBackup set to false for production security.
+            - **Single Token Integration:** Displays and prints exactly ONE unified 3-character uppercase alphanumeric token.
+            - **CVR College ID Verification:** Displays and prints authenticated student CVR Roll Number on physical thermal receipts.
+            - **InnerPrinter Integration:** Direct Model 1008 thermal printer ESC/POS printing.
           files: output/nesty-pos.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

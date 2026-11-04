@@ -37,6 +37,8 @@ public class ApiClient {
                     if (token != null && !token.isEmpty()) {
                         builder.header("Authorization", "Bearer " + token);
                     }
+                    builder.header("X-POS-Device-Id", session.getDeviceId());
+                    builder.header("X-POS-Device-Key", session.getDeviceKey());
                     builder.header("Accept", "application/json");
                     builder.header("User-Agent", "NestyPOS-Model1008/1.0");
                     return chain.proceed(builder.build());

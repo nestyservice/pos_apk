@@ -11,9 +11,13 @@ public class SessionManager {
     private static final String KEY_OPERATOR_ROLE = "operator_role";
     private static final String KEY_BASE_URL = "base_url";
     private static final String KEY_TERMINAL_ID = "terminal_id";
+    private static final String KEY_DEVICE_ID = "pos_device_id";
+    private static final String KEY_DEVICE_KEY = "pos_device_key";
 
     public static final String DEFAULT_BASE_URL = "https://nesty-service-app.onrender.com/";
     public static final String DEFAULT_TERMINAL_ID = "POS-1008-Counter1";
+    public static final String DEFAULT_DEVICE_ID = "POS-1008-COUNTER1";
+    public static final String DEFAULT_DEVICE_KEY = "nesty_pos_dev_sec_7a8f9c1e2b4d";
 
     private final SharedPreferences prefs;
 
@@ -61,6 +65,22 @@ public class SessionManager {
 
     public void setTerminalId(String terminalId) {
         prefs.edit().putString(KEY_TERMINAL_ID, terminalId).apply();
+    }
+
+    public String getDeviceId() {
+        return prefs.getString(KEY_DEVICE_ID, DEFAULT_DEVICE_ID);
+    }
+
+    public void setDeviceId(String deviceId) {
+        prefs.edit().putString(KEY_DEVICE_ID, deviceId).apply();
+    }
+
+    public String getDeviceKey() {
+        return prefs.getString(KEY_DEVICE_KEY, DEFAULT_DEVICE_KEY);
+    }
+
+    public void setDeviceKey(String deviceKey) {
+        prefs.edit().putString(KEY_DEVICE_KEY, deviceKey).apply();
     }
 
     public void clearSession() {
